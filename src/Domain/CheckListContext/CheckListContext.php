@@ -2,27 +2,47 @@
 namespace App\Service;
 namespace App\Domain\CheckListContext;
 
+use App\Domain\CheckListContext\Actions\CreateCheckListAction;
+use App\Domain\CheckListContext\Actions\DeleteCheckListAction;
+use App\Domain\CheckListContext\Actions\GetCheckListAction;
+use App\Domain\CheckListContext\Entities\CheckList;
 use Exception;
 
 class CheckListContext
 {
+    public function __construct(
+        private GetCheckListAction $getCheckListAction,
+        private DeleteCheckListAction $deleteCheckList,
+        private CreateCheckListAction $createCheckList,
+    )
+    {
+        $contextBuilder = new ContextBuilder();
+        $this->getCheckListAction = $contextBuilder->createGetCheckListAction();
+        $this->deleteCheckList = $contextBuilder->createDeleteCheckListAction();
+        $this->createCheckList = $contextBuilder->createCreateCheckListAction();
+    }
+
+    /**
+     * @throws Exception
+     */
     public function getCheckLists(): array
     {
-        throw new Exception('Not implement');
-        $result = [];
-        $result[] = ['sdf0'];
-        return $result;
+        return $this->getCheckListAction->execute();
     }
 
-    public function deleteCheckList(): bool
+    /**
+     * @throws Exception
+     */
+    public function deleteCheckList(int $id): bool
     {
-        throw new Exception('Not implement');
-        return false;
+        return $this->deleteCheckList->execute($id);
     }
 
-    public function createCheckList(): array
+    /**
+     * @throws Exception
+     */
+    public function createCheckList(array $attributes): CheckList
     {
-        throw new Exception('Not implement');
-        return [];
+        return $this->createCheckList->execute($attributes);
     }
 }

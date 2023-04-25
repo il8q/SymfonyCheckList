@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\CheckList;
+use App\Domain\CheckListContext\Entities\CheckList;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

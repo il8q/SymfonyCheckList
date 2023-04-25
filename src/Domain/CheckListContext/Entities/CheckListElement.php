@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity;
+namespace App\Domain\CheckListContext\Entities;
 
 use App\Repository\CheckListElementRepository;
 use Doctrine\ORM\Mapping as ORM;
