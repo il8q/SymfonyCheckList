@@ -54,7 +54,7 @@ class ContextController extends BaseController
     ): JsonResponse
     {
         return $this->wrapResultForResponse(
-            ['id' => intval($request->request->get('id'))],
+            ['id' => $request->request->getInt('id')],
             new Collection([
                 'id' => [new Required(new Type(['type' => 'integer'])), new Positive()],
             ]),

@@ -1,5 +1,6 @@
 <?php
 
+namespace App\Entities;
 namespace App\Domain\CheckListContext\Entities;
 
 use App\Repository\CheckListRepository;

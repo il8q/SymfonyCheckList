@@ -6,17 +6,20 @@ use App\Domain\CheckListContext\Actions\CreateCheckListAction;
 use App\Domain\CheckListContext\Actions\DeleteCheckListAction;
 use App\Domain\CheckListContext\Actions\GetCheckListAction;
 use App\Domain\CheckListContext\Entities\CheckList;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
 class CheckListContext
 {
     public function __construct(
+        private EntityManagerInterface $entityManager,
         private GetCheckListAction $getCheckListAction,
         private DeleteCheckListAction $deleteCheckList,
         private CreateCheckListAction $createCheckList,
     )
     {
-        $contextBuilder = new ContextBuilder();
+        $contextBuilder = new ContextBuilder($entityManager);
         $this->getCheckListAction = $contextBuilder->createGetCheckListAction();
         $this->deleteCheckList = $contextBuilder->createDeleteCheckListAction();
         $this->createCheckList = $contextBuilder->createCreateCheckListAction();
@@ -25,7 +28,7 @@ class CheckListContext
     /**
      * @throws Exception
      */
-    public function getCheckLists(): array
+    public function getCheckLists(): Entities\CheckListArray
     {
         return $this->getCheckListAction->execute();
     }
