@@ -5,13 +5,21 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Constraints\Collection;
+use Symfony\Component\Validator\Exception\ValidatorException;
+use Symfony\Component\Validator\Validation;
 
 class BaseController extends AbstractController
 {
-    protected function wrapResultForResponse($func): JsonResponse
+    protected function wrapResultForResponse(
+        array $inputData,
+        Collection $rules,
+        callable $func
+    ): JsonResponse
     {
         try {
-            $result = $func();
+            $this->validate($inputData, $rules);
+            $result = $func($inputData);
             return $this->json(
                 ['data' => $result],
                 Response::HTTP_OK,
@@ -21,6 +29,15 @@ class BaseController extends AbstractController
                 ['error' => $exception->getMessage()],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
+        }
+    }
+
+    protected function validate($value, $constraints)
+    {
+        $validator = Validation::createValidator();
+        $violations = $validator->validate($value, $constraints);
+        if (count($violations) > 0) {
+            throw new ValidatorException($violations);
         }
     }
 }

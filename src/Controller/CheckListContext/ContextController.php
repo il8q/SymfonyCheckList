@@ -8,15 +8,24 @@ use App\Domain\CheckListContext\EntitySerializer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\Collection;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Positive;
+use Symfony\Component\Validator\Constraints\Required;
+use Symfony\Component\Validator\Constraints\Type;
 
 class ContextController extends BaseController
 {
     #[Route('/check-lists/get-lists')]
-    public function getCheckLists(CheckListContext $context): JsonResponse
+    public function getCheckLists(Request $request, CheckListContext $context): JsonResponse
     {
-        return $this->wrapResultForResponse(function () use ($context) {
-            return ['checkList' => $context->getCheckLists()];
-        });
+        return $this->wrapResultForResponse(
+            $request->query->all(),
+            new Collection([]),
+            function ($inputData) use ($context) {
+                return ['checkList' => $context->getCheckLists()];
+            }
+        );
     }
 
     #[Route('/check-lists/create')]
@@ -27,12 +36,15 @@ class ContextController extends BaseController
 
     ): JsonResponse
     {
-        return $this->wrapResultForResponse(function () use ($request, $context) {
-            $attributes = [
-                'title' => $request->request->get('title')
-            ];
-            return ['checkList' => $context->createCheckList($attributes)];
-        });
+        return $this->wrapResultForResponse(
+            $request->request->all(),
+            new Collection([
+                'title' => [new Required(new Type(['type' => 'string'])), new NotBlank()],
+            ]),
+            function ($inputData) use ($context) {
+                return ['checkList' => $context->createCheckList($inputData)];
+            }
+        );
     }
 
     #[Route('/check-lists/delete')]
@@ -41,9 +53,14 @@ class ContextController extends BaseController
         CheckListContext $context
     ): JsonResponse
     {
-        $id = $request->request->get('id');
-        return $this->wrapResultForResponse(function () use ($id, $context) {
-            return ['success' => $context->deleteCheckList($id)];
-        });
+        return $this->wrapResultForResponse(
+            ['id' => intval($request->request->get('id'))],
+            new Collection([
+                'id' => [new Required(new Type(['type' => 'integer'])), new Positive()],
+            ]),
+            function ($inputData) use ($context) {
+                return ['success' => $context->deleteCheckList($inputData['id'])];
+            }
+        );
     }
 }
