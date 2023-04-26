@@ -4,6 +4,7 @@ namespace App\Entities;
 namespace App\Domain\CheckListContext\Entities;
 
 use App\Repository\CheckListRepository;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -15,23 +16,27 @@ class CheckList
     #[ORM\Column]
     #[Assert\Type('integer')]
     #[Assert\Positive]
+    #[Groups(['full', 'for_list'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\Type('string')]
     #[Assert\NotBlank]
+    #[Groups(['full', 'for_list'])]
     private ?string $title = null;
 
     #[ORM\Column]
     #[Assert\DateTime]
+    #[Groups(['full', 'for_list'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
     #[Assert\DateTime]
+    #[Groups(['full'])]
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[Assert\IsTrue(message: 'UpdateAt must more or equal createdAt')]
-    public function isUpdateAtMoreCreateAt(): bool
+    public function checkUpdateAtMoreCreateAt(): bool
     {
         return $this->updatedAt >= $this->createdAt;
     }

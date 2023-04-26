@@ -9,7 +9,7 @@ use Exception;
 class GetCheckListStrategies
 {
     public function __construct(
-        private  CheckListDatabaseManagerInterface $databaseManager,
+        private CheckListDatabaseManagerInterface $databaseManager,
     )
     {
     }

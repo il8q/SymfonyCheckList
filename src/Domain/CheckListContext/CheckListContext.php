@@ -28,9 +28,9 @@ class CheckListContext
     /**
      * @throws Exception
      */
-    public function getCheckLists(): Entities\CheckListArray
+    public function getCheckLists(int $limit, int $offset): Entities\CheckListArray
     {
-        return $this->getCheckListAction->execute();
+        return $this->getCheckListAction->execute($limit, $offset);
     }
 
     /**

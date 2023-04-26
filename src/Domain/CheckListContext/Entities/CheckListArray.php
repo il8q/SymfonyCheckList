@@ -8,8 +8,8 @@ use ReturnTypeWillChange;
 class CheckListArray extends ArrayObject {
     #[ReturnTypeWillChange] public function offsetSet($key, $value) {
         if ($value instanceof CheckList) {
-            parent::offsetSet($key, $value);
+            return parent::offsetSet($key, $value);
         }
-        throw new \InvalidArgumentException('Value must be a Foo');
+        throw new \InvalidArgumentException('Value must be a CheckList');
     }
 }

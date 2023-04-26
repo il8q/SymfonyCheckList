@@ -11,19 +11,41 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\Collection;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Positive;
+use Symfony\Component\Validator\Constraints\PositiveOrZero;
 use Symfony\Component\Validator\Constraints\Required;
 use Symfony\Component\Validator\Constraints\Type;
 
 class ContextController extends BaseController
 {
     #[Route('/check-lists/get-lists')]
-    public function getCheckLists(Request $request, CheckListContext $context): JsonResponse
+    public function getCheckLists(
+        Request $request,
+        CheckListContext $context,
+        EntitySerializer $serializer
+    ): JsonResponse
     {
+        $inputData = [
+            'limit' => $request->query->getInt('limit'),
+            'offset' => $request->query->getInt('offset'),
+        ];
+        if (
+            !array_key_exists('limit', $inputData)
+            || ($inputData['limit'] <= 0)
+        ) {
+            $inputData['limit'] = 10;
+        }
         return $this->wrapResultForResponse(
-            $request->query->all(),
-            new Collection([]),
-            function ($inputData) use ($context) {
-                return ['checkList' => $context->getCheckLists()];
+            $inputData,
+            new Collection([
+                'limit' => [new Type(['type' => 'integer']), new Positive()],
+                'offset' => [new Type(['type' => 'integer']), new PositiveOrZero()],
+            ]),
+            function ($inputData) use ($serializer, $context) {
+                $result = $context->getCheckLists(
+                    $inputData['limit'],
+                    $inputData['offset']
+                );
+                return $serializer->serializeForList($result);
             }
         );
     }

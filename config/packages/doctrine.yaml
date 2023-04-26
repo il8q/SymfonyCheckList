@@ -15,7 +15,12 @@ doctrine:
                 is_bundle: false
                 dir: '%kernel.project_dir%/src/Entity'
                 prefix: 'App\Entity'
-                alias: App
+                alias:
+            CheckList:
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Domain/CheckListContext/Entities'
+                prefix: 'App\Domain\CheckListContext'
+                alias: CheckListContext
 
 when@test:
     doctrine:

@@ -17,8 +17,11 @@ class CheckListDatabaseManager implements CheckListDatabaseManagerInterface
     {
         $result = new CheckListArray();
         $queryResult = $this->checkListRepository->findBy([], limit: $limit, offset: $offset);
-        foreach ($queryResult as $checkList) {
-            $result[] = $checkList;
+
+        if ($queryResult) {
+            foreach ($queryResult as $checkList) {
+                $result[] = $checkList;
+            }
         }
         return $result;
     }
