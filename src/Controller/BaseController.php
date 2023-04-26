@@ -21,12 +21,15 @@ class BaseController extends AbstractController
             $this->validate($inputData, $rules);
             $result = $func($inputData);
             return $this->json(
-                ['data' => $result],
+                $result,
                 Response::HTTP_OK,
             );
         } catch (\Exception $exception) {
             return $this->json(
-                ['error' => $exception->getMessage()],
+                [
+                    'error' => $exception->getMessage(),
+                    'trace' => $exception->getTrace(),
+                ],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }
