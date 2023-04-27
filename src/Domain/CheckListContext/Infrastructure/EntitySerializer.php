@@ -8,6 +8,7 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
@@ -23,7 +24,8 @@ class EntitySerializer
             )
         );
         $normalizer = new ObjectNormalizer($classMetadataFactory);
-        $this->serializer = new Serializer([$normalizer]);
+        $datetimeNormalizer = new DateTimeNormalizer([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d H:i']);
+        $this->serializer = new Serializer([$datetimeNormalizer, $normalizer]);
     }
 
     /**
