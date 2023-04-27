@@ -4,7 +4,8 @@ namespace App\Controller\CheckListContext;
 
 use App\Controller\BaseController;
 use App\Domain\CheckListContext\CheckListContext;
-use App\Domain\CheckListContext\EntitySerializer;
+use App\Domain\CheckListContext\Infrastructure\BadReqeustException;
+use App\Domain\CheckListContext\Infrastructure\EntitySerializer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -24,22 +25,16 @@ class ContextController extends BaseController
         EntitySerializer $serializer
     ): JsonResponse
     {
-        $inputData = [
-            'limit' => $request->query->getInt('limit'),
-            'offset' => $request->query->getInt('offset'),
-        ];
-        if (
-            !array_key_exists('limit', $inputData)
-            || ($inputData['limit'] <= 0)
-        ) {
-            $inputData['limit'] = 10;
-        }
         return $this->wrapResultForResponse(
-            $inputData,
+            $request->query->all(),
             new Collection([
                 'limit' => [new Type(['type' => 'integer']), new Positive()],
                 'offset' => [new Type(['type' => 'integer']), new PositiveOrZero()],
             ]),
+            [
+                'limit' => 10,
+                'offset' => 0,
+            ],
             function ($inputData) use ($serializer, $context) {
                 $result = $context->getCheckLists(
                     $inputData['limit'],
@@ -63,6 +58,7 @@ class ContextController extends BaseController
             new Collection([
                 'title' => [new Required(new Type(['type' => 'string'])), new NotBlank()],
             ]),
+            [],
             function ($inputData) use ($context) {
                 return ['checkList' => $context->createCheckList($inputData)];
             }
@@ -80,6 +76,7 @@ class ContextController extends BaseController
             new Collection([
                 'id' => [new Required(new Type(['type' => 'integer'])), new Positive()],
             ]),
+            [],
             function ($inputData) use ($context) {
                 return ['success' => $context->deleteCheckList($inputData['id'])];
             }

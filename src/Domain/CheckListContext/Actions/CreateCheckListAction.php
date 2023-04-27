@@ -7,6 +7,12 @@ use Exception;
 
 class CreateCheckListAction
 {
+    public function __construct(
+/*        private GetCheckListRules $rules,
+        private GetCheckListStrategies $stragies*/
+    )
+    {
+    }
     public function execute(array $attributes): CheckList
     {
         throw new Exception('Not implement');

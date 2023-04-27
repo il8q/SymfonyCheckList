@@ -38,6 +38,9 @@ class ContextBuilder
         return new GetCheckListRules();
     }
 
+    /**
+     * @throws NotSupported
+     */
     private function createGetCheckListStrategies(): GetCheckListStrategies
     {
         return new GetCheckListStrategies(

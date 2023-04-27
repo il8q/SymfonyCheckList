@@ -1,6 +1,6 @@
 <?php
 namespace App\Service;
-namespace App\Domain\CheckListContext;
+namespace App\Domain\CheckListContext\Infrastructure;
 
 use App\Domain\CheckListContext\Entities\CheckList;
 use App\Domain\CheckListContext\Entities\CheckListArray;
