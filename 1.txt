@@ -1,2 +1,0 @@
-5432 postgre port
-password 1
