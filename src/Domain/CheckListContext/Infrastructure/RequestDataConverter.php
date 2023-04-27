@@ -5,9 +5,7 @@ namespace App\Domain\CheckListContext\Infrastructure;
 use Closure;
 use Exception;
 use Symfony\Component\Validator\Constraints\Collection;
-use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Validator\Constraints\Type;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Преобразует данные из Request в пакет данных для контекста/доменной модели.
@@ -15,25 +13,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class RequestDataConverter
 {
-    public function __construct(
-        private ValidatorInterface $validator,
-    )
-    {
-    }
-
-    /**
-     * @throws Exception
-     */
-    private static function extractAndCheckType(string $name, array $rules): string
-    {
-        foreach ($rules as $rule) {
-            if ($rule instanceof Type) {
-               return $rule->type;
-            }
-        }
-        throw new Exception(sprintf("%s not have type", $name));
-    }
-
     /**
      * @param array $requestData
      * @param Collection $rules
@@ -44,49 +23,74 @@ class RequestDataConverter
     {
         $result = [];
         foreach ($requestData as $name => $value) {
-            $type = self::extractAndCheckType($name, $rules->fields[$name]);
-            var_dump($name);
+            $rulesForVariable = $rules->fields[$name]->constraints;
+            $type = self::extractTypeForRules($name, $rulesForVariable);
             $result[$name] = $this->convertVariable(
                 $requestData,
                 $name,
-                self::getRuleCollectionFor($type),
+                self::getRuleCollectionFor($type, $name),
                 self::getConvertFunctionFor($type),
             );
         }
-
         return $result;
     }
 
+    /**
+     * @throws Exception
+     */
+    private static function extractTypeForRules(string $name, array $rules): string
+    {
+        foreach ($rules as $rule) {
+            if ($rule instanceof Type) {
+                return $rule->type;
+            }
+        }
+        throw new Exception(sprintf("%s not have type", $name));
+    }
+
+    /**
+     * @throws BadReqeustException
+     */
     private function convertVariable(
         array $requestData,
         string $name,
-        Collection $rules,
+        callable $checkFunction,
         callable $convertFunction
     ): mixed
     {
         $variable = $requestData[$name];
-        $this->validator->validate($variable, $rules);
+        $checkFunction($variable);
         return $convertFunction($variable);
     }
 
     /**
      * @param string $type
-     * @return Collection
+     * @param string $name
+     * @return callable
      */
-    public static function getRuleCollectionFor(string $type): Collection
+    public static function getRuleCollectionFor(string $type, string $name): Closure
     {
         return match ($type) {
-            'integer' => new Collection([
-                new Type(['type' => 'string']),
-                new Regex("(\d)+")
-            ]),
-            'float' => new Collection([
-                new Type(['type' => 'string']),
-                new Regex("(\d)+.(\d)*")
-            ]),
-            'string' => new Collection([
-                new Type(['type' => 'string'])
-            ]),
+            'integer' => function($value) use ($name) {
+                $result = preg_match("/^[-+]?[0-9]+$/", $value);
+                if (!$result) {
+                    throw new Exception(sprintf("%s not integer", $name));
+                }
+                return true;
+            },
+            'float' => function($value) use ($name) {
+                $result = preg_match("/^[-+]?[0-9]+.[0-9]*$/", $value);
+                if (!$result) {
+                    throw new Exception(sprintf("%s not float", $name));
+                }
+                return true;
+            },
+            'string' => function($value) use ($name) {
+                if (gettype($value) !== 'string') {
+                    throw new Exception(sprintf("%s not string", $name));
+                }
+                return true;
+            },
         };
     }
 

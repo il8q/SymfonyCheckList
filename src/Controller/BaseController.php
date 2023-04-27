@@ -42,6 +42,7 @@ class BaseController extends AbstractController
             return $this->json(
                 [
                     'error' => $exception->getMessage(),
+                    'trace' => $exception->getTrace(),
                 ],
                 Response::HTTP_BAD_REQUEST
             );

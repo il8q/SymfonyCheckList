@@ -13,10 +13,10 @@ use Exception;
 class CheckListContext
 {
     public function __construct(
-        private EntityManagerInterface $entityManager,
-        private GetCheckListAction $getCheckListAction,
-        private DeleteCheckListAction $deleteCheckList,
-        private CreateCheckListAction $createCheckList,
+        private readonly EntityManagerInterface $entityManager,
+        private GetCheckListAction              $getCheckListAction,
+        private DeleteCheckListAction           $deleteCheckList,
+        private CreateCheckListAction           $createCheckList,
     )
     {
         $contextBuilder = new ContextBuilder($entityManager);
