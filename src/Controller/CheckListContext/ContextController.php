@@ -56,11 +56,12 @@ class ContextController extends BaseController
         return $this->wrapResultForResponse(
             $request->request->all(),
             new Collection([
-                'title' => [new Required(new Type(['type' => 'string'])), new NotBlank()],
+                'title' => [new Required(), new Type(['type' => 'string']), new NotBlank()],
             ]),
             [],
-            function ($inputData) use ($context) {
-                return ['checkList' => $context->createCheckList($inputData)];
+            function ($inputData) use ($serializer, $context) {
+                $checkList = $context->createCheckList($inputData);
+                return ['checkList' => $serializer->serializeFull($checkList)];
             }
         );
     }

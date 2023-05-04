@@ -6,17 +6,17 @@ use App\Domain\CheckListContext\Actions\CreateCheckListAction;
 use App\Domain\CheckListContext\Actions\DeleteCheckListAction;
 use App\Domain\CheckListContext\Actions\GetCheckListAction;
 use App\Domain\CheckListContext\Entities\CheckList;
+use App\Domain\CheckListContext\Rules\CreateCheckListRules;
 use App\Domain\CheckListContext\Rules\GetCheckListRules;
+use App\Domain\CheckListContext\Strategies\CreateCheckListStrategies;
 use App\Domain\CheckListContext\Strategies\GetCheckListStrategies;
 use App\Domain\CheckListContext\TechnologyAdapters\CheckListDatabaseManager;
 use App\Domain\CheckListContext\TechnologyAdapters\CheckListDatabaseManagerInterface;
 use App\Repository\CheckListRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Exception\NotSupported;
 
 class ContextBuilder
 {
-
     public function __construct(
         private EntityManagerInterface $entityManager,
         private ?CheckListDatabaseManagerInterface $checkListDatabaseManager = null,
@@ -38,9 +38,7 @@ class ContextBuilder
         return new GetCheckListRules();
     }
 
-    /**
-     * @throws NotSupported
-     */
+
     private function createGetCheckListStrategies(): GetCheckListStrategies
     {
         return new GetCheckListStrategies(
@@ -48,26 +46,26 @@ class ContextBuilder
         );
     }
 
-    /**
-     * @throws NotSupported
-     */
+
     private function getOrCreateCheckListDatabaseManager(): CheckListDatabaseManagerInterface
     {
         if ($this->checkListDatabaseManager) {
             return $this->checkListDatabaseManager;
         }
-        return new CheckListDatabaseManager($this->getOrCreateCheckListRepository());
+        return new CheckListDatabaseManager(
+            $this->getOrCreateCheckListRepository(),
+            $this->entityManager
+        );
     }
 
-    /**
-     * @throws NotSupported
-     */
     private function getOrCreateCheckListRepository(): CheckListRepository
     {
         if ($this->checkListRepository) {
             return $this->checkListRepository;
         }
-        return $this->entityManager->getRepository(CheckList::class);
+        /** @var CheckListRepository $result */
+        $result = $this->entityManager->getRepository(CheckList::class);
+        return $result;
     }
 
     public function createDeleteCheckListAction(): DeleteCheckListAction
@@ -77,6 +75,21 @@ class ContextBuilder
 
     public function createCreateCheckListAction(): CreateCheckListAction
     {
-        return new CreateCheckListAction();
+        return new CreateCheckListAction(
+            $this->createCreateCheckListRules(),
+            $this->createCreateCheckListStrategies(),
+        );
+    }
+
+    private function createCreateCheckListRules(): CreateCheckListRules
+    {
+        return new CreateCheckListRules();
+    }
+
+    private function createCreateCheckListStrategies(): CreateCheckListStrategies
+    {
+        return new CreateCheckListStrategies(
+            $this->getOrCreateCheckListDatabaseManager()
+        );
     }
 }

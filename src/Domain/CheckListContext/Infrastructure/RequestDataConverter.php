@@ -74,20 +74,20 @@ class RequestDataConverter
             'integer' => function($value) use ($name) {
                 $result = preg_match("/^[-+]?[0-9]+$/", $value);
                 if (!$result) {
-                    throw new Exception(sprintf("%s not integer", $name));
+                    throw new BadReqeustException(sprintf("%s not integer", $name));
                 }
                 return true;
             },
             'float' => function($value) use ($name) {
                 $result = preg_match("/^[-+]?[0-9]+.[0-9]*$/", $value);
                 if (!$result) {
-                    throw new Exception(sprintf("%s not float", $name));
+                    throw new BadReqeustException(sprintf("%s not float", $name));
                 }
                 return true;
             },
             'string' => function($value) use ($name) {
                 if (gettype($value) !== 'string') {
-                    throw new Exception(sprintf("%s not string", $name));
+                    throw new BadReqeustException(sprintf("%s not string", $name));
                 }
                 return true;
             },
